@@ -1,0 +1,27 @@
+[project]
+name = "jerison-lang"
+version = "0.1.0"
+description = "a python interpreter for my own programing language"
+authors = [
+    {name = "JerisonP",email = "whitlight14@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+]
+
+# pyproject.toml
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "-q", "-Werror"]         # -ra: short test summary, -q: cuts the output down to dots plus a short summary
+pythonpath = [
+    ".",
+]
+testpaths = [
+    "tests",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
