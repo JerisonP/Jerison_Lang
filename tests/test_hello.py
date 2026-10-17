@@ -1,4 +1,5 @@
 from pytest import CaptureFixture
+
 from jerison_lang.hello_world import hello
 
 
