@@ -1,0 +1,7 @@
+// An if/else with logical operators.
+var temperature = 72;
+if (temperature > 80 and temperature <= 100) {
+  print "hot";
+} else {
+  print "not hot";
+}
