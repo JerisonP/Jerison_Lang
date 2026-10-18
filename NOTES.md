@@ -1,54 +1,112 @@
 # Jerison_Lang — Notes & Journal
 
-Personal working notes. Not the README — this is where I think out loud about the project: how pieces work, decisions I made, things that confused me, things to revisit.
+Personal working notes for Jerison_Lang. This is where I document what I learn, decisions I make, problems I encounter, and ideas to revisit.
 
-## How to use
+## How to Use
 
-- New entry each work session, newest at the top.
-- Date header, then whatever's on my mind. No need to be tidy.
-- When something clicks or I explain a concept to myself, write that explanation here even if it also belongs in the README later.
+- Add a new entry for each work session, newest first.
+- Keep entries concise, except when explaining concepts worth understanding in depth.
+- Record useful explanations, decisions, mistakes, and unresolved questions.
+- Add every new entry to the table of contents.
+- Use alerts when they add value, not just to decorate the journal.
 
-## Template for a new entry
+## Alert Guide
 
-```
-## YYYY-MM-DD — <short topic>
+GitHub supports colored alerts that help important information stand out. Use them consistently throughout the journal.
 
-### What I worked on
+| Alert | Color | When to Use It |
+|---|---|---|
+| `NOTE` | Blue | Useful context, background information, or the focus of a session. |
+| `TIP` | Green | Helpful techniques, shortcuts, and good practices. |
+| `IMPORTANT` | Purple | Major lessons, architectural decisions, and important breakthroughs. |
+| `WARNING` | Yellow | Unresolved bugs, confusing behavior, and potential problems that need investigation. |
+| `CAUTION` | Red | Serious risks, such as destructive operations or potential data loss. |
 
-### What confused me
+### Alert Guidelines
 
-### What finally clicked
+- Don't force all five alerts into every entry. Use only the ones that are relevant.
+- Keep alerts short and focused on the information that deserves attention.
+- Use colors consistently so they retain their meaning as the journal grows.
+- Reserve `CAUTION` for serious risks, not ordinary bugs or questions.
+- Use `IMPORTANT` sparingly so major takeaways stand out.
 
-### Decisions made
+## Entry Template
 
-### Open questions / next steps
-```
+Copy this template for each new work session. Remove sections you don't need.
 
-## Entries
+    ---
 
-## 2026-10-17 — Project kickoff
+    # YYYY-MM-DD — Topic
 
-### What I worked on
+    > [!NOTE]
+    > **Focus:** Brief description of what you worked on.
 
-- Got the basic workflow running: git add/commit/push, tests, linting, CI all green.
-- Confirmed the Python port of Crafting Interpreters (jLox) is a community port; the book itself is Java/C.
-- Drafted the main README with overview, what an interpreter is, the three stages (scanning, parsing, evaluating), and a roadmap.
+    ## What I Worked On
+    - 
 
-### What confused me
+    ## What I Learned
+    - **Concept:** Explanation in your own words, with examples when useful.
 
-- What exactly is the difference between an interpreter and a compiler 
-- What a first class function is
-- What is Just In Time Compilation (JIT) 
+    ## Decisions
+    - 
 
-### What finally clicked
+    ## Next Steps
+    - 
 
-- the idea of this is that the user never sees python errors if possible 
+    ---
 
-### Decisions made
+## Table of Contents
 
-- Using a separate journal file instead of bloating the README, so the README stays clean and this stays raw.
-- put boundary checks around functions and assume functions get ideal input.
+- [2026-10-17 — Project Kickoff](#2026-10-17--project-kickoff)
 
-### Open questions / next steps
+---
 
-- Start with the scanner.
+# 2026-10-17 — Project Kickoff
+
+> [!NOTE]
+> **Focus:** Setting up the development workflow and building the initial Python CLI harness.
+
+## What I Worked On
+
+- Set up Git, tests, linting, and CI.
+- Drafted the main README and project roadmap.
+- Built the Python CLI harness with argument validation, file checks, and error handling.
+- Added modules for shared constants and exit codes.
+- Implemented binary file reading with explicit UTF-8 decoding.
+
+## What I Learned
+
+- **Interpreter vs. compiler:** An interpreter executes code, while a compiler translates it into another form before execution. Some implementations combine both approaches.
+- **First-class functions:** Functions can be stored in variables, passed as arguments, and returned from other functions, just like other values.
+- **JIT compilation:** Just-in-time compilation translates code into machine code at runtime, often to improve performance.
+- **Bytes vs. strings:** `str(b'hi')` produces `"b'hi'"`, not `"hi"`. Use `.decode()` to convert bytes into text.
+- **Python's byte representation:** The `b` prefix and escape sequences show Python's representation of byte data, not necessarily the literal characters in the original file.
+- **Exit codes:** The `sysexits.h` conventions define `64` for command-line usage errors and `66` for input errors.
+- **`sys.exit()`:** Raises `SystemExit` and stops normal execution, so no additional `return` is needed afterward.
+- **Error handling:** The entry point should validate command-line arguments and input files. Internal functions should focus on their own responsibilities.
+- **File reading:** Reading bytes and decoding explicitly with UTF-8 strict mode gives control over invalid text.
+
+> [!IMPORTANT]
+> The CLI harness should translate expected input errors into clear messages and exit codes rather than exposing raw Python tracebacks.
+
+> [!TIP]
+> Read source files as bytes and decode explicitly when you need predictable control over character encoding.
+
+## Decisions
+
+- Keep the development journal separate from the main README.
+- Use named exit-code constants: `64` for usage errors and `66` for input errors.
+- Read source files as bytes and decode explicitly using UTF-8 strict mode.
+- Check file existence before validating the file extension.
+- Keep internal functions focused and assume input has already been validated.
+
+> [!WARNING]
+> Scanner error handling is not finalized. Decide how errors should be recorded and reported before expanding the scanner.
+
+## Next Steps
+
+- Implement the tree-walking interpreter.
+- Decide how scanner errors should be recorded and reported.
+- Expand the interpreter as new language features are added.
+
+---
