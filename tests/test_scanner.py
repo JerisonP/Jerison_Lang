@@ -165,3 +165,130 @@ class TestSingleCharacterTokens:
             if token_one.line != token_two.line:
                 valid_line = False
         assert tokens == expected and valid_line
+
+
+OPERATOR_SINGLES = [
+    ("!", [Token(T.BANG, "!", None, 1), Token(T.EOF, "", None, 1)]),
+    ("=", [Token(T.EQUAL, "=", None, 1), Token(T.EOF, "", None, 1)]),
+    ("<", [Token(T.LESS, "<", None, 1), Token(T.EOF, "", None, 1)]),
+    (">", [Token(T.GREATER, ">", None, 1), Token(T.EOF, "", None, 1)]),
+]
+
+OPERATOR_PAIRS = [
+    ("!=", [Token(T.BANG_EQUAL, "!=", None, 1), Token(T.EOF, "", None, 1)]),
+    ("==", [Token(T.EQUAL_EQUAL, "==", None, 1), Token(T.EOF, "", None, 1)]),
+    ("<=", [Token(T.LESS_EQUAL, "<=", None, 1), Token(T.EOF, "", None, 1)]),
+    (">=", [Token(T.GREATER_EQUAL, ">=", None, 1), Token(T.EOF, "", None, 1)]),
+]
+
+OPERATOR_SEQUENCES = [
+    (
+        "!=<>=",
+        [
+            Token(T.BANG_EQUAL, "!=", None, 1),
+            Token(T.LESS, "<", None, 1),
+            Token(T.GREATER_EQUAL, ">=", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "==!=<=>=",
+        [
+            Token(T.EQUAL_EQUAL, "==", None, 1),
+            Token(T.BANG_EQUAL, "!=", None, 1),
+            Token(T.LESS_EQUAL, "<=", None, 1),
+            Token(T.GREATER_EQUAL, ">=", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "! = < >",
+        [
+            Token(T.BANG, "!", None, 1),
+            Token(T.EQUAL, "=", None, 1),
+            Token(T.LESS, "<", None, 1),
+            Token(T.GREATER, ">", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+]
+
+OPERATOR_EDGE_CASES = [
+    (
+        "!==",
+        [
+            Token(T.BANG_EQUAL, "!=", None, 1),
+            Token(T.EQUAL, "=", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "===",
+        [
+            Token(T.EQUAL_EQUAL, "==", None, 1),
+            Token(T.EQUAL, "=", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "<<=",
+        [
+            Token(T.LESS, "<", None, 1),
+            Token(T.LESS_EQUAL, "<=", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "!\n=",
+        [
+            Token(T.BANG, "!", None, 1),
+            Token(T.EQUAL, "=", None, 2),
+            Token(T.EOF, "", None, 2),
+        ],
+    ),
+]
+
+class TestOperatorCharacterTokens:
+    @pytest.mark.parametrize(("source", "expected"), OPERATOR_SINGLES)
+    def test_single(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), OPERATOR_PAIRS)
+    def test_pairs(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), OPERATOR_SEQUENCES)
+    def test_sequences(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), OPERATOR_EDGE_CASES)
+    def test_edge_cases(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
