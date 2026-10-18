@@ -126,27 +126,42 @@ class TestSingleCharacterTokens:
     def test_single(self, source: str, expected: list[Token]):
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-        assert tokens == expected
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
 
     @pytest.mark.parametrize(("source", "expected"), PAIRS)
     def test_pairs(self, source: str, expected: list[Token]):
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-        assert tokens == expected
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
 
     @pytest.mark.parametrize(("source", "expected"), SEQUENCES)
     def test_sequences(self, source: str, expected: list[Token]):
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-        for token in tokens:
-            print(token)
-        print("/n")
-        for token in expected:
-            print(token)
-        assert tokens == expected
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
 
     @pytest.mark.parametrize(("source", "expected"), EDGE_CASES)
     def test_edge_cases(self, source: str, expected: list[Token]):
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-        assert tokens == expected
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
