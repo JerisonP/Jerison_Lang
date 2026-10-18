@@ -1,12 +1,12 @@
 # Future Language Notes
 
-## what i want:
-- static types
-- robust error messaging showing the line number and where the syntax error is
-- compiled language
-- type deduction 
+## What I Want
+- Static types
+- Type deduction (inference)
+- Compiled language
+- Robust error messages that show the line number and exactly where the syntax error is
 
-## advice:
-- when dealing with errors you should probably make an error class ErrorReporter or something like that
-- some token implementations store the location as two numbers: the offset from the beginning of the source file to the beginning f the lexeme, and the length of the lexeme. The scanner needs to know these anyway, so there's no overhead to calculate them. this offset can be converted to line and column positions later by looking back at the source file and counting the preceding newlines. we only do this when we need to actually display a line and column to the user which is slow but again only done a hand full of times
+## Advice
+- **Error reporting:** Make a dedicated error class (something like `ErrorReporter`) instead of loose functions, so error state and reporting live in one place.
+- **Token locations:** Some implementations store a token's location as two numbers: the offset from the start of the source file to the start of the lexeme, and the lexeme's length. The scanner already tracks both, so there's no extra cost. The offset can be turned into a line and column later by looking back at the source and counting the newlines before it. That's slow, but it only happens when an error actually needs to be shown, which is rare.
 

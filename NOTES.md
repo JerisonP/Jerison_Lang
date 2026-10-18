@@ -56,8 +56,69 @@ Copy this template for each new work session. Remove sections you don't need.
     ---
 
 ## Table of Contents
-
+ 
 - [2026-10-17 — Project Kickoff](#2026-10-17--project-kickoff)
+- [2026-10-18 — Scanner First Pass](#2026-10-18--scanner-first-pass)
+
+---
+
+# 2026-10-18 — Scanner First Pass
+
+> [!NOTE]
+> **Focus:** Build the first functional scanner and a comprehensive pytest suite covering single-character tokens, operators, comments, whitespace, strings, and numbers.
+
+## What I Worked On
+
+- Restructured the scanner following *Crafting Interpreters*: `scan_tokens()` → `scan_token()` → `add_token()`.
+- Added scanning helpers: `advance()`, `peek()`, `peek_next()`, and `match()`.
+- Implemented single-character tokens, paired operators (`!=`, `==`, `<=`, `>=`), comments, whitespace, strings, and numbers.
+- Expanded tests to compare complete `Token(...)` objects, including lexemes, literals, and line numbers.
+- Grouped tests by token family, covering individual tokens, pairs, sequences, and edge cases.
+- Moved `run()`, `run_file()`, and `run_prompt()` into `runners.py` and separated error reporting into its own module.
+
+## What I Learned
+
+### Python and Object Behavior
+
+- **`__eq__()` and list comparison:** Python compares lists element by element using each element's `__eq__()` method. Without a suitable implementation, two tokens with identical fields won't necessarily compare as equal.
+- **`__str__()` vs. `__repr__()`:** `print(token)` uses `__str__()`, while printing a list uses `__repr__()` for each element.
+- **Default arguments replace overloading:** Bob overloads `addToken()` in Java because Java doesn't support default arguments in the same way Python does. In Python, `literal: object = None` provides the same convenience.
+- **Explicit instance access:** Python methods use `self.` to access instance attributes and other methods. Helpers that don't need instance state can be defined at the module level.
+- **Read-only collection interfaces:** `Mapping`, `Sequence`, and `Set` from `collections.abc` describe the interfaces a function expects. They communicate intended usage to callers and type checkers but don't prevent modifications at runtime.
+
+### Scanner Behavior
+
+- **Lox strings have no escape sequences:** `\n` inside a string represents two literal characters, not a newline. Actual line breaks are allowed inside strings and must increment the line counter.
+- **EOF sentinel:** Bob uses `'\0'` to represent the end of the source. Returning `"\0"` from `peek()` at the end prevents out-of-bounds reads and simplifies loops for comments, strings, and numbers.
+
+### Error Handling
+
+- **Separate detection from reporting:** The code that detects an error and the code that reports it should have separate responsibilities. Keeping functions focused makes the code easier to understand and maintain.
+
+## Decisions
+
+> [!IMPORTANT]
+> These decisions define the scanner's behavior and testing approach.
+
+- **Token types use enums** for readable names and to help catch invalid token types instead of relying on string comparisons.
+- **`peek()` returns `"\0"` at EOF** instead of raising `IndexError`, centralizing boundary handling.
+- **Number syntax follows Lox:** `.123` and `123.` are not valid number literals.
+- **All numeric literals are floats** because Lox has a single number type.
+- **Tests compare complete tokens**, including type, lexeme, literal, and line number, so line tracking is tested too.
+
+## Issues to Investigate
+
+> [!WARNING]
+> A few bugs remain, and the error-handling flow needs further investigation.
+
+- The end-to-end error-handling flow is still unclear, and some leftover error code will matter later.
+
+## Next Steps
+
+- [ ] Add identifiers, keywords, and the missing `TRUE` token type.
+- [ ] Extract repeated test-method logic into a shared helper.
+- [ ] Investigate the error-handling flow.
+- [ ] Change `peek()` (and `peek_next()`) to return `None` at end of file instead of `"\0"`. It's more Pythonic, and there's no Java `charAt` constraint forcing a zero char. Update the return type to `str | None`.
 
 ---
 
@@ -105,8 +166,8 @@ Copy this template for each new work session. Remove sections you don't need.
 
 ## Next Steps
 
-- Implement the tree-walking interpreter.
-- Decide how scanner errors should be recorded and reported.
+- []Implement the tree-walking interpreter.
+- [x]Decide how scanner errors should be recorded and reported.
 - Expand the interpreter as new language features are added.
 
 ---
