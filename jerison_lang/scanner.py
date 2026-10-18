@@ -19,8 +19,6 @@ class Scanner:
     def __advance(self) -> str:
         char = self.__source[self.__current]
         self.__current += 1
-        if char == "\n":
-            self.__line += 1
         return char
 
     def __add_token(self, token_type: T, literal: object = None) -> None:
@@ -34,6 +32,11 @@ class Scanner:
             return False
         self.__current += 1
         return True
+
+    def __peek(self) -> str:
+        if self.__is_at_end():
+            return "\0"
+        return self.__source[self.__current]
 
     def __scan_token(self) -> None:
         char = self.__advance()
@@ -66,6 +69,20 @@ class Scanner:
                 self.__add_token(T.LESS_EQUAL if self.__match("=") else T.LESS)
             case ">":
                 self.__add_token(T.GREATER_EQUAL if self.__match("=") else T.GREATER)
+            case "/":
+                if self.__match("/"):
+                    while self.__peek() != "\n" and not self.__is_at_end():
+                        self.__advance()
+                else:
+                    self.__add_token(T.SLASH)
+            case " ":
+                pass
+            case "\r":
+                pass
+            case "\t":
+                pass
+            case "\n":
+                self.__line += 1
             case _:
                 error(self.__line, "Unexpected character.")
 

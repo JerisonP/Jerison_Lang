@@ -292,3 +292,154 @@ class TestOperatorCharacterTokens:
             if token_one.line != token_two.line:
                 valid_line = False
         assert tokens == expected and valid_line
+
+COMMENT_WS_SINGLES = [
+    ("/", [Token(T.SLASH, "/", None, 1), Token(T.EOF, "", None, 1)]),
+    ("// comment", [Token(T.EOF, "", None, 1)]),
+    (" ", [Token(T.EOF, "", None, 1)]),
+    ("\t", [Token(T.EOF, "", None, 1)]),
+    ("\r", [Token(T.EOF, "", None, 1)]),
+    ("\n", [Token(T.EOF, "", None, 2)]),
+]
+
+COMMENT_WS_PAIRS = [
+    ("//", [Token(T.EOF, "", None, 1)]),
+    (
+        "/ /",
+        [
+            Token(T.SLASH, "/", None, 1),
+            Token(T.SLASH, "/", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (" \t", [Token(T.EOF, "", None, 1)]),
+    ("\r\n", [Token(T.EOF, "", None, 2)]),
+]
+
+COMMENT_WS_SEQUENCES = [
+    (
+        "(/)",
+        [
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.SLASH, "/", None, 1),
+            Token(T.RIGHT_PAREN, ")", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "<= / >=",
+        [
+            Token(T.LESS_EQUAL, "<=", None, 1),
+            Token(T.SLASH, "/", None, 1),
+            Token(T.GREATER_EQUAL, ">=", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "{\t*\r}",
+        [
+            Token(T.LEFT_BRACE, "{", None, 1),
+            Token(T.STAR, "*", None, 1),
+            Token(T.RIGHT_BRACE, "}", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "!= // not equal\n;",
+        [
+            Token(T.BANG_EQUAL, "!=", None, 1),
+            Token(T.SEMICOLON, ";", None, 2),
+            Token(T.EOF, "", None, 2),
+        ],
+    ),
+    (
+        "( // open\n)",
+        [
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.RIGHT_PAREN, ")", None, 2),
+            Token(T.EOF, "", None, 2),
+        ],
+    ),
+]
+
+COMMENT_WS_EDGE_CASES = [
+    ("( // no newline after", [Token(T.LEFT_PAREN, "(", None, 1), Token(T.EOF, "", None, 1)]),
+    ("\n\n\n", [Token(T.EOF, "", None, 4)]),
+    (
+        "(\n\n)",
+        [
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.RIGHT_PAREN, ")", None, 3),
+            Token(T.EOF, "", None, 3),
+        ],
+    ),
+    (
+        "/(",
+        [
+            Token(T.SLASH, "/", None, 1),
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "/=",
+        [
+            Token(T.SLASH, "/", None, 1),
+            Token(T.EQUAL, "=", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "// a // b\n;",
+        [
+            Token(T.SEMICOLON, ";", None, 2),
+            Token(T.EOF, "", None, 2),
+        ],
+    ),
+    (" \t\r\n \t", [Token(T.EOF, "", None, 2)]),
+]
+
+class TestCommentWSCharacterTokens:
+    @pytest.mark.parametrize(("source", "expected"), COMMENT_WS_SINGLES)
+    def test_single(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), COMMENT_WS_PAIRS)
+    def test_pairs(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), COMMENT_WS_SEQUENCES)
+    def test_sequences(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), COMMENT_WS_EDGE_CASES)
+    def test_edge_cases(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
