@@ -39,5 +39,4 @@ class Token:
             self.token_type == other.token_type
             and self.lexeme == other.lexeme
             and self.literal == other.literal
-            and self.line == other.line
         )
