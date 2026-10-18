@@ -1,5 +1,5 @@
-from jerison_lang.token import Token, TokenType
 from jerison_lang.error import error
+from jerison_lang.token import Token, TokenType
 
 T = TokenType
 
@@ -26,9 +26,7 @@ class Scanner:
         self.__tokens.append(Token(token_type, text, literal, self.__line))
 
     def __match(self, expected: str) -> bool:
-        if self.__is_at_end():
-            return False
-        elif self.__source[self.__current] != expected:
+        if self.__is_at_end() or self.__source[self.__current] != expected:
             return False
         self.__current += 1
         return True

@@ -1,7 +1,9 @@
-from jerison_lang.scanner import Scanner, Token
+import sys
+
 import jerison_lang.constants as const
 from jerison_lang import error as err
-import sys
+from jerison_lang.scanner import Scanner, Token
+
 
 def run(source: str) -> bool:
     scanner = Scanner(source)
