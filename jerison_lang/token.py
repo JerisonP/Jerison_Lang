@@ -11,7 +11,7 @@ class Token:
         self.__line = line
 
     @property
-    def toke_type(self) -> TokenType:
+    def token_type(self) -> TokenType:
         return self.__token_type
 
     @property
@@ -26,5 +26,18 @@ class Token:
     def line(self) -> int:
         return self.__line
 
-    def to_string(self) -> str:
-        return f"{self.toke_type} {self.lexeme} {self.literal}"
+    def __str__(self) -> str:
+        return f"{self.token_type} {self.lexeme} {self.literal}"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def __eq__(self, other: Token):
+        if not isinstance(other, Token):
+            return NotImplemented
+        return (
+            self.token_type == other.token_type
+            and self.lexeme == other.lexeme
+            and self.literal == other.literal
+            and self.line == other.line
+        )
