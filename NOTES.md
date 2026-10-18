@@ -11,7 +11,7 @@ Personal working notes. Not the README — this is where I think out loud about 
 ## Template for a new entry
 
 ```
-## YYYY-MM-DD; HH:MM — <short topic>
+## YYYY-MM-DD — <short topic>
 
 ### What I worked on
 
@@ -26,7 +26,7 @@ Personal working notes. Not the README — this is where I think out loud about 
 
 ## Entries
 
-## 2026-10-17; 5:39 — Project kickoff
+## 2026-10-17 — Project kickoff
 
 ### What I worked on
 
@@ -42,9 +42,12 @@ Personal working notes. Not the README — this is where I think out loud about 
 
 ### What finally clicked
 
+- the idea of this is that the user never sees python errors if possible 
+
 ### Decisions made
 
 - Using a separate journal file instead of bloating the README, so the README stays clean and this stays raw.
+- put boundary checks around functions and assume functions get ideal input.
 
 ### Open questions / next steps
 

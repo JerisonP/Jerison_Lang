@@ -1,16 +1,12 @@
-import jerison_lang as jlang
-from jerison_lang import constants as const
 import sys
+from pathlib import Path
+
+from jerison_lang import constants as const
+from jerison_lang import error_codes as err
 
 
 def valid_extension(file_name: str) -> bool:
     return file_name.endswith(const.FILE_EXTENSION)
-
-
-def read_bytes(file_name: str) -> bytes:
-    with open(file_name, "rb") as file:
-        data = file.read()
-    return data
 
 
 def run(text: str) -> None:
@@ -18,7 +14,8 @@ def run(text: str) -> None:
 
 
 def run_file(file_name: str) -> None:
-    source = read_bytes(file_name).decode(const.DEFAULT_CHARACTER_SET, errors="strict")
+    with open(file_name, "rb") as file:
+        source = file.read().decode(const.DEFAULT_CHARACTER_SET)
     run(source)
 
 
@@ -27,25 +24,26 @@ def run_prompt() -> None:
         try:
             line = input("> ")
         except EOFError:
-            return None
+            return
         run(line)
 
 
 if __name__ == "__main__":
-    # Validate user input of file
     len_args = len(sys.argv)
     if len_args > 2:
-        raise ValueError(
-            f"too many arguments where give. no more then one was expected but {len_args - 1} was given"
-        )
-    # Run file
+        print("Usage: jerison_lang <file>.jlang", file=sys.stderr)
+        sys.exit(err.COMMAND_LINE_USAGE_ERROR)
     elif len_args == 2:
         file_name = sys.argv[1]
         if not valid_extension(file_name):
-            raise ValueError(
-                f"file with the extension {const.FILE_EXTENSION} was expected"
+            print(
+                f"Error: file must have a {const.FILE_EXTENSION} extension",
+                file=sys.stderr,
             )
+            sys.exit(err.COMMAND_LINE_USAGE_ERROR)
+        elif not Path(file_name).exists():
+            print(f"Error: file not found: {file_name}", file=sys.stderr)
+            sys.exit(err.CANT_OPEN_INPUT)
         run_file(file_name)
-    # Interactive mode
     else:
         run_prompt()
