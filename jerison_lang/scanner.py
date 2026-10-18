@@ -38,6 +38,41 @@ class Scanner:
             return "\0"
         return self.__source[self.__current]
 
+    def __is_digit(self, char: str):
+        return char in "0123456789"
+
+    def __peek_next(self) -> str:
+        if self.__current + 1 >= len(self.__source):
+            return "\0"
+        return self.__source[self.__current + 1]
+
+    def __string(self):
+        while self.__peek() != "\"" and not self.__is_at_end():
+            if self.__peek() == "\n":
+                self.__line += 1
+            self.__advance()
+
+        if self.__is_at_end():
+            error(self.__line, "Unterminated string.")
+            return 
+
+        self.__advance()
+
+        value = self.__source[self.__start + 1:self.__current - 1]
+        self.__add_token(T.STRING, value)  
+
+    def __number(self) -> None:
+        while self.__is_digit(self.__peek()):
+            self.__advance()
+
+        if self.__peek() == "." and self.__is_digit(self.__peek_next()):
+            self.__advance()
+
+        while self.__is_digit(self.__peek()):
+            self.__advance()
+
+        self.__add_token(T.NUMBER, float(self.__source[self.__start:self.__current]))
+
     def __scan_token(self) -> None:
         char = self.__advance()
         match char:
@@ -83,7 +118,12 @@ class Scanner:
                 pass
             case "\n":
                 self.__line += 1
+            case "\"":
+                self.__string()
             case _:
+                if self.__is_digit(char):
+                    self.__number()
+                
                 error(self.__line, "Unexpected character.")
 
     def __is_at_end(self) -> bool:

@@ -443,3 +443,167 @@ class TestCommentWSCharacterTokens:
             if token_one.line != token_two.line:
                 valid_line = False
         assert tokens == expected and valid_line
+
+LITERAL_SINGLES = [
+    ("0", [Token(T.NUMBER, "0", 0.0, 1), Token(T.EOF, "", None, 1)]),
+    ("123", [Token(T.NUMBER, "123", 123.0, 1), Token(T.EOF, "", None, 1)]),
+    ("4567", [Token(T.NUMBER, "4567", 4567.0, 1), Token(T.EOF, "", None, 1)]),
+    ("123.456", [Token(T.NUMBER, "123.456", 123.456, 1), Token(T.EOF, "", None, 1)]),
+    ("0.5", [Token(T.NUMBER, "0.5", 0.5, 1), Token(T.EOF, "", None, 1)]),
+    ("3.14159", [Token(T.NUMBER, "3.14159", 3.14159, 1), Token(T.EOF, "", None, 1)]),
+    ('"hello"', [Token(T.STRING, '"hello"', "hello", 1), Token(T.EOF, "", None, 1)]),
+    ('"hello world"', [Token(T.STRING, '"hello world"', "hello world", 1), Token(T.EOF, "", None, 1)]),
+    ('""', [Token(T.STRING, '""', "", 1), Token(T.EOF, "", None, 1)]),
+    ('" "', [Token(T.STRING, '" "', " ", 1), Token(T.EOF, "", None, 1)]),
+]
+
+LITERAL_PAIRS = [
+    (
+        "1 2",
+        [
+            Token(T.NUMBER, "1", 1.0, 1),
+            Token(T.NUMBER, "2", 2.0, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "-5",
+        [
+            Token(T.MINUS, "-", None, 1),
+            Token(T.NUMBER, "5", 5.0, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        '"a""b"',
+        [
+            Token(T.STRING, '"a"', "a", 1),
+            Token(T.STRING, '"b"', "b", 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        '"a" "b"',
+        [
+            Token(T.STRING, '"a"', "a", 1),
+            Token(T.STRING, '"b"', "b", 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+]
+
+LITERAL_SEQUENCES = [
+    (
+        "1+2.5",
+        [
+            Token(T.NUMBER, "1", 1.0, 1),
+            Token(T.PLUS, "+", None, 1),
+            Token(T.NUMBER, "2.5", 2.5, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "(3.5) >= 0",
+        [
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.NUMBER, "3.5", 3.5, 1),
+            Token(T.RIGHT_PAREN, ")", None, 1),
+            Token(T.GREATER_EQUAL, ">=", None, 1),
+            Token(T.NUMBER, "0", 0.0, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "1\n2",
+        [
+            Token(T.NUMBER, "1", 1.0, 1),
+            Token(T.NUMBER, "2", 2.0, 2),
+            Token(T.EOF, "", None, 2),
+        ],
+    ),
+    (
+        '("hi")',
+        [
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.STRING, '"hi"', "hi", 1),
+            Token(T.RIGHT_PAREN, ")", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        '"a" + "b";',
+        [
+            Token(T.STRING, '"a"', "a", 1),
+            Token(T.PLUS, "+", None, 1),
+            Token(T.STRING, '"b"', "b", 1),
+            Token(T.SEMICOLON, ";", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        '"x" != 1',
+        [
+            Token(T.STRING, '"x"', "x", 1),
+            Token(T.BANG_EQUAL, "!=", None, 1),
+            Token(T.NUMBER, "1", 1.0, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+]
+
+LITERAL_EDGE_CASES = [
+    ("0.0", [Token(T.NUMBER, "0.0", 0.0, 1), Token(T.EOF, "", None, 1)]),
+    ("999999", [Token(T.NUMBER, "999999", 999999.0, 1), Token(T.EOF, "", None, 1)]),
+    (r'"\"', [Token(T.STRING, r'"\"', "\\", 1), Token(T.EOF, "", None, 1)]),
+    (r'"a\nb"', [Token(T.STRING, r'"a\nb"', r"a\nb", 1), Token(T.EOF, "", None, 1)]),
+    (r'"a\tb"', [Token(T.STRING, r'"a\tb"', r"a\tb", 1), Token(T.EOF, "", None, 1)]),
+    ('"a\nb"', [Token(T.STRING, '"a\nb"', "a\nb", 2), Token(T.EOF, "", None, 2)]),
+    ('"// not a comment"', [Token(T.STRING, '"// not a comment"', "// not a comment", 1), Token(T.EOF, "", None, 1)]),
+    ('"123"', [Token(T.STRING, '"123"', "123", 1), Token(T.EOF, "", None, 1)]),
+]
+
+
+class TestLiteralTokens:
+    @pytest.mark.parametrize(("source", "expected"), LITERAL_SINGLES)
+    def test_single(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), LITERAL_PAIRS)
+    def test_pairs(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), LITERAL_SEQUENCES)
+    def test_sequences(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
+
+    @pytest.mark.parametrize(("source", "expected"), LITERAL_EDGE_CASES)
+    def test_edge_cases(self, source: str, expected: list[Token]):
+        scanner = Scanner(source)
+        tokens = scanner.scan_tokens()
+        valid_line = True
+        for token_one, token_two in zip(tokens, expected):
+            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+            if token_one.line != token_two.line:
+                valid_line = False
+        assert tokens == expected and valid_line
