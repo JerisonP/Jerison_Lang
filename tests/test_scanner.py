@@ -4,6 +4,45 @@ from jerison_lang.scanner import Scanner, Token, TokenType
 
 T = TokenType
 
+def pytest_generate_tests(metafunc):
+    if metafunc.cls is not None and hasattr(metafunc.cls, "cases"):
+        metafunc.parametrize(
+            ("source", "expected"),
+            metafunc.cls.cases[metafunc.function.__name__],
+        )
+
+
+def check_tokens(source: str, expected: list[Token]):
+    scanner = Scanner(source)
+    tokens = scanner.scan_tokens()
+    valid_line = True
+    for token_one, token_two in zip(tokens, expected):
+        print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
+        if token_one.line != token_two.line:
+            valid_line = False
+    assert tokens == expected and valid_line
+
+
+class BaseScannerTest:
+    cases = {
+        "test_single": [],
+        "test_pairs": [],
+        "test_sequences": [],
+        "test_edge_cases": [],
+    }
+
+    def test_single(self, source: str, expected: list[Token]):
+        check_tokens(source, expected)
+
+    def test_pairs(self, source: str, expected: list[Token]):
+        check_tokens(source, expected)
+
+    def test_sequences(self, source: str, expected: list[Token]):
+        check_tokens(source, expected)
+
+    def test_edge_cases(self, source: str, expected: list[Token]):
+        check_tokens(source, expected)
+
 
 SINGLES = [
     ("(", [Token(T.LEFT_PAREN, "(", None, 1), Token(T.EOF, "", None, 1)]),
@@ -120,52 +159,13 @@ EDGE_CASES = [
     ("*" * 1000, [Token(T.STAR, "*", None, 1)] * 1000 + [Token(T.EOF, "", None, 1)]),
 ]
 
-
-class TestSingleCharacterTokens:
-    @pytest.mark.parametrize(("source", "expected"), SINGLES)
-    def test_single(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), PAIRS)
-    def test_pairs(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), SEQUENCES)
-    def test_sequences(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), EDGE_CASES)
-    def test_edge_cases(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
+class TestSingleCharacterTokens(BaseScannerTest):
+    cases = {
+        "test_single": SINGLES,
+        "test_pairs": PAIRS,
+        "test_sequences": SEQUENCES,
+        "test_edge_cases": EDGE_CASES,
+    }
 
 OPERATOR_SINGLES = [
     ("!", [Token(T.BANG, "!", None, 1), Token(T.EOF, "", None, 1)]),
@@ -248,50 +248,13 @@ OPERATOR_EDGE_CASES = [
     ),
 ]
 
-class TestOperatorCharacterTokens:
-    @pytest.mark.parametrize(("source", "expected"), OPERATOR_SINGLES)
-    def test_single(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), OPERATOR_PAIRS)
-    def test_pairs(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), OPERATOR_SEQUENCES)
-    def test_sequences(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), OPERATOR_EDGE_CASES)
-    def test_edge_cases(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
+class TestOperatorCharacterTokens(BaseScannerTest):
+    cases = {
+        "test_single": OPERATOR_SINGLES,
+        "test_pairs": OPERATOR_PAIRS,
+        "test_sequences": OPERATOR_SEQUENCES,
+        "test_edge_cases": OPERATOR_EDGE_CASES,
+    }
 
 COMMENT_WS_SINGLES = [
     ("/", [Token(T.SLASH, "/", None, 1), Token(T.EOF, "", None, 1)]),
@@ -399,50 +362,13 @@ COMMENT_WS_EDGE_CASES = [
     (" \t\r\n \t", [Token(T.EOF, "", None, 2)]),
 ]
 
-class TestCommentWSCharacterTokens:
-    @pytest.mark.parametrize(("source", "expected"), COMMENT_WS_SINGLES)
-    def test_single(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), COMMENT_WS_PAIRS)
-    def test_pairs(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), COMMENT_WS_SEQUENCES)
-    def test_sequences(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
-
-    @pytest.mark.parametrize(("source", "expected"), COMMENT_WS_EDGE_CASES)
-    def test_edge_cases(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
+class TestCommentWSCharacterTokens(BaseScannerTest):
+    cases = {
+        "test_single": COMMENT_WS_SINGLES,
+        "test_pairs": COMMENT_WS_PAIRS,
+        "test_sequences": COMMENT_WS_SEQUENCES,
+        "test_edge_cases": COMMENT_WS_EDGE_CASES,
+    }
 
 LITERAL_SINGLES = [
     ("0", [Token(T.NUMBER, "0", 0.0, 1), Token(T.EOF, "", None, 1)]),
@@ -562,48 +488,255 @@ LITERAL_EDGE_CASES = [
     ('"123"', [Token(T.STRING, '"123"', "123", 1), Token(T.EOF, "", None, 1)]),
 ]
 
+class TestLiteralTokens(BaseScannerTest):
+    cases = {
+        "test_single": LITERAL_SINGLES,
+        "test_pairs": LITERAL_PAIRS,
+        "test_sequences": LITERAL_SEQUENCES,
+        "test_edge_cases": LITERAL_EDGE_CASES,
+    }
 
-class TestLiteralTokens:
-    @pytest.mark.parametrize(("source", "expected"), LITERAL_SINGLES)
-    def test_single(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
+KEYWORD_SINGLES = [
+    ("and", [Token(T.AND, "and", None, 1), Token(T.EOF, "", None, 1)]),
+    ("class", [Token(T.CLASS, "class", None, 1), Token(T.EOF, "", None, 1)]),
+    ("else", [Token(T.ELSE, "else", None, 1), Token(T.EOF, "", None, 1)]),
+    ("false", [Token(T.FALSE, "false", None, 1), Token(T.EOF, "", None, 1)]),
+    ("for", [Token(T.FOR, "for", None, 1), Token(T.EOF, "", None, 1)]),
+    ("fun", [Token(T.FUN, "fun", None, 1), Token(T.EOF, "", None, 1)]),
+    ("if", [Token(T.IF, "if", None, 1), Token(T.EOF, "", None, 1)]),
+    ("nil", [Token(T.NIL, "nil", None, 1), Token(T.EOF, "", None, 1)]),
+    ("or", [Token(T.OR, "or", None, 1), Token(T.EOF, "", None, 1)]),
+    ("print", [Token(T.PRINT, "print", None, 1), Token(T.EOF, "", None, 1)]),
+    ("return", [Token(T.RETURN, "return", None, 1), Token(T.EOF, "", None, 1)]),
+    ("super", [Token(T.SUPER, "super", None, 1), Token(T.EOF, "", None, 1)]),
+    ("this", [Token(T.THIS, "this", None, 1), Token(T.EOF, "", None, 1)]),
+    ("true", [Token(T.TRUE, "true", None, 1), Token(T.EOF, "", None, 1)]),
+    ("var", [Token(T.VAR, "var", None, 1), Token(T.EOF, "", None, 1)]),
+    ("while", [Token(T.WHILE, "while", None, 1), Token(T.EOF, "", None, 1)]),
+]
 
-    @pytest.mark.parametrize(("source", "expected"), LITERAL_PAIRS)
-    def test_pairs(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
+KEYWORD_PAIRS = [
+    (
+        "true false",
+        [
+            Token(T.TRUE, "true", None, 1),
+            Token(T.FALSE, "false", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "if else",
+        [
+            Token(T.IF, "if", None, 1),
+            Token(T.ELSE, "else", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "and or",
+        [
+            Token(T.AND, "and", None, 1),
+            Token(T.OR, "or", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "this\nsuper",
+        [
+            Token(T.THIS, "this", None, 1),
+            Token(T.SUPER, "super", None, 2),
+            Token(T.EOF, "", None, 2),
+        ],
+    ),
+]
 
-    @pytest.mark.parametrize(("source", "expected"), LITERAL_SEQUENCES)
-    def test_sequences(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
+KEYWORD_SEQUENCES = [
+    (
+        "print nil;",
+        [
+            Token(T.PRINT, "print", None, 1),
+            Token(T.NIL, "nil", None, 1),
+            Token(T.SEMICOLON, ";", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "while (true) return;",
+        [
+            Token(T.WHILE, "while", None, 1),
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.TRUE, "true", None, 1),
+            Token(T.RIGHT_PAREN, ")", None, 1),
+            Token(T.RETURN, "return", None, 1),
+            Token(T.SEMICOLON, ";", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "class fun var for",
+        [
+            Token(T.CLASS, "class", None, 1),
+            Token(T.FUN, "fun", None, 1),
+            Token(T.VAR, "var", None, 1),
+            Token(T.FOR, "for", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+]
 
-    @pytest.mark.parametrize(("source", "expected"), LITERAL_EDGE_CASES)
-    def test_edge_cases(self, source: str, expected: list[Token]):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-        valid_line = True
-        for token_one, token_two in zip(tokens, expected):
-            print(f"{token_one} {token_one.line}// {token_two} {token_two.line}")
-            if token_one.line != token_two.line:
-                valid_line = False
-        assert tokens == expected and valid_line
+KEYWORD_EDGE_CASES = [
+    ("orchid", [Token(T.IDENTIFIER, "orchid", None, 1), Token(T.EOF, "", None, 1)]),
+    ("classy", [Token(T.IDENTIFIER, "classy", None, 1), Token(T.EOF, "", None, 1)]),
+    ("nil_", [Token(T.IDENTIFIER, "nil_", None, 1), Token(T.EOF, "", None, 1)]),
+    ("for1", [Token(T.IDENTIFIER, "for1", None, 1), Token(T.EOF, "", None, 1)]),
+    ("And", [Token(T.IDENTIFIER, "And", None, 1), Token(T.EOF, "", None, 1)]),
+    ("TRUE", [Token(T.IDENTIFIER, "TRUE", None, 1), Token(T.EOF, "", None, 1)]),
+    (
+        "if(",
+        [
+            Token(T.IF, "if", None, 1),
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    ('"while"', [Token(T.STRING, '"while"', "while", 1), Token(T.EOF, "", None, 1)]),
+    ("// if else", [Token(T.EOF, "", None, 1)]),
+]
+
+class TestKeywordTokens(BaseScannerTest):
+    cases = {
+        "test_single": KEYWORD_SINGLES,
+        "test_pairs": KEYWORD_PAIRS,
+        "test_sequences": KEYWORD_SEQUENCES,
+        "test_edge_cases": KEYWORD_EDGE_CASES,
+    }
+
+IDENTIFIER_SINGLES = [
+    ("x", [Token(T.IDENTIFIER, "x", None, 1), Token(T.EOF, "", None, 1)]),
+    ("foo", [Token(T.IDENTIFIER, "foo", None, 1), Token(T.EOF, "", None, 1)]),
+    ("Foo", [Token(T.IDENTIFIER, "Foo", None, 1), Token(T.EOF, "", None, 1)]),
+    ("_", [Token(T.IDENTIFIER, "_", None, 1), Token(T.EOF, "", None, 1)]),
+    ("_bar", [Token(T.IDENTIFIER, "_bar", None, 1), Token(T.EOF, "", None, 1)]),
+    ("x1", [Token(T.IDENTIFIER, "x1", None, 1), Token(T.EOF, "", None, 1)]),
+    ("snake_case", [Token(T.IDENTIFIER, "snake_case", None, 1), Token(T.EOF, "", None, 1)]),
+    ("camelCase", [Token(T.IDENTIFIER, "camelCase", None, 1), Token(T.EOF, "", None, 1)]),
+]
+
+IDENTIFIER_PAIRS = [
+    (
+        "a b",
+        [
+            Token(T.IDENTIFIER, "a", None, 1),
+            Token(T.IDENTIFIER, "b", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "foo.bar",
+        [
+            Token(T.IDENTIFIER, "foo", None, 1),
+            Token(T.DOT, ".", None, 1),
+            Token(T.IDENTIFIER, "bar", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "a\nb",
+        [
+            Token(T.IDENTIFIER, "a", None, 1),
+            Token(T.IDENTIFIER, "b", None, 2),
+            Token(T.EOF, "", None, 2),
+        ],
+    ),
+]
+
+IDENTIFIER_SEQUENCES = [
+    (
+        "var x = 10;",
+        [
+            Token(T.VAR, "var", None, 1),
+            Token(T.IDENTIFIER, "x", None, 1),
+            Token(T.EQUAL, "=", None, 1),
+            Token(T.NUMBER, "10", 10.0, 1),
+            Token(T.SEMICOLON, ";", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "fun add(a, b) { return a + b; }",
+        [
+            Token(T.FUN, "fun", None, 1),
+            Token(T.IDENTIFIER, "add", None, 1),
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.IDENTIFIER, "a", None, 1),
+            Token(T.COMMA, ",", None, 1),
+            Token(T.IDENTIFIER, "b", None, 1),
+            Token(T.RIGHT_PAREN, ")", None, 1),
+            Token(T.LEFT_BRACE, "{", None, 1),
+            Token(T.RETURN, "return", None, 1),
+            Token(T.IDENTIFIER, "a", None, 1),
+            Token(T.PLUS, "+", None, 1),
+            Token(T.IDENTIFIER, "b", None, 1),
+            Token(T.SEMICOLON, ";", None, 1),
+            Token(T.RIGHT_BRACE, "}", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "if (x >= y) print x;\nelse print y;",
+        [
+            Token(T.IF, "if", None, 1),
+            Token(T.LEFT_PAREN, "(", None, 1),
+            Token(T.IDENTIFIER, "x", None, 1),
+            Token(T.GREATER_EQUAL, ">=", None, 1),
+            Token(T.IDENTIFIER, "y", None, 1),
+            Token(T.RIGHT_PAREN, ")", None, 1),
+            Token(T.PRINT, "print", None, 1),
+            Token(T.IDENTIFIER, "x", None, 1),
+            Token(T.SEMICOLON, ";", None, 1),
+            Token(T.ELSE, "else", None, 2),
+            Token(T.PRINT, "print", None, 2),
+            Token(T.IDENTIFIER, "y", None, 2),
+            Token(T.SEMICOLON, ";", None, 2),
+            Token(T.EOF, "", None, 2),
+        ],
+    ),
+]
+
+IDENTIFIER_EDGE_CASES = [
+    (
+        "1x",
+        [
+            Token(T.NUMBER, "1", 1.0, 1),
+            Token(T.IDENTIFIER, "x", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    ("__init__", [Token(T.IDENTIFIER, "__init__", None, 1), Token(T.EOF, "", None, 1)]),
+    ("a1b2c3", [Token(T.IDENTIFIER, "a1b2c3", None, 1), Token(T.EOF, "", None, 1)]),
+    (
+        "x-y",
+        [
+            Token(T.IDENTIFIER, "x", None, 1),
+            Token(T.MINUS, "-", None, 1),
+            Token(T.IDENTIFIER, "y", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    (
+        "x// comment",
+        [
+            Token(T.IDENTIFIER, "x", None, 1),
+            Token(T.EOF, "", None, 1),
+        ],
+    ),
+    ("a" * 1000, [Token(T.IDENTIFIER, "a" * 1000, None, 1), Token(T.EOF, "", None, 1)]),
+]
+
+class TestIdentifierTokens(BaseScannerTest):
+    cases = {
+        "test_single": IDENTIFIER_SINGLES,
+        "test_pairs": IDENTIFIER_PAIRS,
+        "test_sequences": IDENTIFIER_SEQUENCES,
+        "test_edge_cases": IDENTIFIER_EDGE_CASES,
+    }

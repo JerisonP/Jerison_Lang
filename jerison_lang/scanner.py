@@ -5,6 +5,25 @@ T = TokenType
 
 
 class Scanner:
+    keywords = {
+        "and": T.AND,
+        "class": T.CLASS,
+        "else": T.ELSE,
+        "false": T.FALSE,
+        "for": T.FOR,
+        "fun": T.FUN,
+        "if": T.IF,
+        "nil": T.NIL,
+        "or": T.OR,
+        "print": T.PRINT,
+        "return": T.RETURN,
+        "super": T.SUPER,
+        "this": T.THIS,
+        "true": T.TRUE,
+        "var": T.VAR,
+        "while": T.WHILE,
+    }
+
     def __init__(self, source: str) -> None:
         self.__source = source
         self.__tokens: list[Token] = []
@@ -31,20 +50,22 @@ class Scanner:
         self.__current += 1
         return True
 
-    def __peek(self) -> str:
+    def __peek(self) -> str | None:
         if self.__is_at_end():
-            return "\0"
+            return None
         return self.__source[self.__current]
 
-    def __is_digit(self, char: str):
+    def __is_digit(self, char: str | None) -> bool:
+        if not char:
+            return False
         return char in "0123456789"
 
-    def __peek_next(self) -> str:
+    def __peek_next(self) -> str | None:
         if self.__current + 1 >= len(self.__source):
-            return "\0"
+            return  None 
         return self.__source[self.__current + 1]
 
-    def __string(self):
+    def __string(self) -> None:
         while self.__peek() != "\"" and not self.__is_at_end():
             if self.__peek() == "\n":
                 self.__line += 1
@@ -71,6 +92,21 @@ class Scanner:
 
         self.__add_token(T.NUMBER, float(self.__source[self.__start:self.__current]))
 
+    def __is_alpha(self, char: str | None) -> bool:
+        if not char:
+            return False
+        return char.isalpha() or char == "_"
+
+    def __is_alnum(self, char: str | None) -> bool:
+        return self.__is_alpha(char) or self.__is_digit(char)
+
+    def __identifier(self) -> None:
+        while self.__is_alnum(self.__peek()):
+            self.__advance()
+        text = self.__source[self.__start: self.__current]
+        token_type = Scanner.keywords.get(text, T.IDENTIFIER)
+        self.__add_token(token_type)
+    
     def __scan_token(self) -> None:
         char = self.__advance()
         match char:
@@ -121,7 +157,8 @@ class Scanner:
             case _:
                 if self.__is_digit(char):
                     self.__number()
-                
+                elif self.__is_alpha(char):
+                    self.__identifier()
                 error(self.__line, "Unexpected character.")
 
     def __is_at_end(self) -> bool:
