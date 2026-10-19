@@ -59,6 +59,50 @@ Copy this template for each new work session. Remove sections you don't need.
  
 - [2026-10-17 — Project Kickoff](#2026-10-17--project-kickoff)
 - [2026-10-18 — Scanner First Pass](#2026-10-18--scanner-first-pass)
+- [2026-10-19 — Scanner First Pass](#2026-10-19--finishing-the-scanner)
+
+Writing
+
+# 2026-10-19 — Finishing the Scanner
+
+> \[\!NOTE\] **Focus:** Finished identifier and keyword scanning, wrote tests, and refactored the test suite to share a common base class.
+
+## What I Worked On
+
+- Finished identifier scanning and keyword recognition.
+- Converted Bob's Java `keywords` HashMap into a Python dictionary mapping keywords to their `TokenType`.
+- Added tests for keywords and identifiers, covering singles, pairs, sequences, and edge cases.
+- Created a shared `BaseScannerTest` class with four test methods, allowing each token group to provide its own test cases.
+- Used `pytest_generate_tests` to generate tests from each subclass's `cases` dictionary.
+
+## What I Learned
+
+### Pytest and Test Organization
+
+- **Base test classes:** Pytest doesn't collect a class whose name doesn't start with `Test` on its own. However, its test methods are inherited and run by subclasses whose names start with `Test`.
+- **Why****`@pytest.mark.parametrize`****can't use subclass-specific data:** The decorator runs when the base class is defined, before any subclasses exist. It therefore can't access their test arrays.
+- **The****`pytest_generate_tests`****hook:** This module-level function lets pytest generate test cases dynamically during collection, before any tests execute.
+- **The****`metafunc`****object:** Pytest passes this object to the hook. `metafunc.cls` identifies the class being collected, while `metafunc.function.__name__` gives the test method's name. Calling `metafunc.parametrize()` creates a separate test for each case.
+- **Test collection:** Pytest first discovers tests and generates all parameterized cases, then runs them.
+- **Class-specific fixtures:** A fixture can use `request.cls` to access attributes on the test class it's serving. This provides another way to give inherited tests class-specific data.
+- **Readable test IDs:** Parameterized test IDs include the case name, making failures easier to identify. For example, `TestKeywordTokens::test_single[orchid-expected0]` tells me which test group, method, and case failed.
+
+### Scanner Behavior
+
+- **Maximal munch:** The scanner reads the entire word before checking whether it's a keyword. For example, `orchid` becomes one identifier, not `or` followed by `chid`.
+- **Case-sensitive keywords:** `And` and `TRUE` are identifiers, not keywords, because keyword matching is case-sensitive.
+- **Keyword lookup with a default:** Using `keywords.get(text, T.IDENTIFIER)` means that words not found in the keyword dictionary automatically become identifiers.
+
+## Decisions
+
+> \[\!IMPORTANT\] These decisions affect both the scanner and the design of my future language.
+
+- **Test structure:** Keep one `BaseScannerTest` with four shared test methods and a `cases` dictionary for each token group.
+
+## Next Steps
+
+- [ ]Investigate the error-handling flow.
+- [ ]Start the _Representing Code_ chapter of _Crafting Interpreters_.
 
 ---
 
@@ -115,10 +159,10 @@ Copy this template for each new work session. Remove sections you don't need.
 
 ## Next Steps
 
-- [ ] Add identifiers, keywords, and the missing `TRUE` token type.
-- [ ] Extract repeated test-method logic into a shared helper.
+- [x] Add identifiers, keywords, and the missing `TRUE` token type.
+- [x] Extract repeated test-method logic into a shared helper.
 - [ ] Investigate the error-handling flow.
-- [ ] Change `peek()` (and `peek_next()`) to return `None` at end of file instead of `"\0"`. It's more Pythonic, and there's no Java `charAt` constraint forcing a zero char. Update the return type to `str | None`.
+- [x] Change `peek()` (and `peek_next()`) to return `None` at end of file instead of `"\0"`. It's more Pythonic, and there's no Java `charAt` constraint forcing a zero char. Update the return type to `str | None`.
 
 ---
 
