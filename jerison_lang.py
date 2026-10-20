@@ -2,33 +2,16 @@ import sys
 from pathlib import Path
 
 from jerison_lang import constants as const
-from jerison_lang import error_codes as err
+from jerison_lang import error as err
+from jerison_lang import runner as run
 
 
 def valid_extension(file_name: str) -> bool:
     return file_name.endswith(const.FILE_EXTENSION)
 
 
-def run(text: str) -> None:
-    pass
-
-
-def run_file(file_name: str) -> None:
-    with open(file_name, "rb") as file:
-        source = file.read().decode(const.DEFAULT_CHARACTER_SET)
-    run(source)
-
-
-def run_prompt() -> None:
-    while True:
-        try:
-            line = input("> ")
-        except EOFError:
-            return
-        run(line)
-
-
 if __name__ == "__main__":
+    had_error = False
     len_args = len(sys.argv)
     if len_args > 2:
         print("Usage: jerison_lang <file>.jlang", file=sys.stderr)
@@ -44,6 +27,6 @@ if __name__ == "__main__":
         elif not Path(file_name).exists():
             print(f"Error: file not found: {file_name}", file=sys.stderr)
             sys.exit(err.CANT_OPEN_INPUT)
-        run_file(file_name)
+        run.run_file(file_name, [had_error])
     else:
-        run_prompt()
+        run.run_prompt([had_error])

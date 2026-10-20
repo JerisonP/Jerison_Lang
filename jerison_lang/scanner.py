@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+
 from jerison_lang.error import error
 from jerison_lang.token import Token, TokenType
 
@@ -5,7 +7,7 @@ T = TokenType
 
 
 class Scanner:
-    keywords = {
+    keywords: Mapping[str, T] = {
         "and": T.AND,
         "class": T.CLASS,
         "else": T.ELSE,
@@ -41,7 +43,7 @@ class Scanner:
         return char
 
     def __add_token(self, token_type: T, literal: object = None) -> None:
-        text = self.__source[self.__start:self.__current]
+        text = self.__source[self.__start : self.__current]
         self.__tokens.append(Token(token_type, text, literal, self.__line))
 
     def __match(self, expected: str) -> bool:
@@ -62,23 +64,23 @@ class Scanner:
 
     def __peek_next(self) -> str | None:
         if self.__current + 1 >= len(self.__source):
-            return  None 
+            return None
         return self.__source[self.__current + 1]
 
     def __string(self) -> None:
-        while self.__peek() != "\"" and not self.__is_at_end():
+        while self.__peek() != '"' and not self.__is_at_end():
             if self.__peek() == "\n":
                 self.__line += 1
             self.__advance()
 
         if self.__is_at_end():
             error(self.__line, "Unterminated string.")
-            return 
+            return
 
         self.__advance()
 
-        value = self.__source[self.__start + 1:self.__current - 1]
-        self.__add_token(T.STRING, value)  
+        value = self.__source[self.__start + 1 : self.__current - 1]
+        self.__add_token(T.STRING, value)
 
     def __number(self) -> None:
         while self.__is_digit(self.__peek()):
@@ -90,7 +92,7 @@ class Scanner:
         while self.__is_digit(self.__peek()):
             self.__advance()
 
-        self.__add_token(T.NUMBER, float(self.__source[self.__start:self.__current]))
+        self.__add_token(T.NUMBER, float(self.__source[self.__start : self.__current]))
 
     def __is_alpha(self, char: str | None) -> bool:
         if not char:
@@ -103,10 +105,10 @@ class Scanner:
     def __identifier(self) -> None:
         while self.__is_alnum(self.__peek()):
             self.__advance()
-        text = self.__source[self.__start: self.__current]
+        text = self.__source[self.__start : self.__current]
         token_type = Scanner.keywords.get(text, T.IDENTIFIER)
         self.__add_token(token_type)
-    
+
     def __scan_token(self) -> None:
         char = self.__advance()
         match char:
@@ -152,14 +154,15 @@ class Scanner:
                 pass
             case "\n":
                 self.__line += 1
-            case "\"":
+            case '"':
                 self.__string()
             case _:
                 if self.__is_digit(char):
                     self.__number()
                 elif self.__is_alpha(char):
                     self.__identifier()
-                error(self.__line, "Unexpected character.")
+                else:
+                    error(self.__line, "Unexpected character.")
 
     def __is_at_end(self) -> bool:
         return self.__current >= len(self.__source)

@@ -19,7 +19,7 @@ def run(source: str) -> bool:
 def run_file(file_name: str, had_error: list[bool]) -> None:
     with open(file_name, "rb") as file:
         source = file.read().decode(const.DEFAULT_CHARACTER_SET)
-    
+
     had_error[0] = run(source)
     if had_error[0]:
         sys.exit(err.COMMAND_LINE_USAGE_ERROR)
