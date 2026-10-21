@@ -1,0 +1,6 @@
+// Declares variables, reassigns one, and prints them.
+var name = "Jerison";
+var count = 3;
+count = count + 1;
+print name;
+print count;

@@ -1,0 +1,2 @@
+FILE_EXTENSION = ".jlang"
+DEFAULT_CHARACTER_SET = "utf-8"
