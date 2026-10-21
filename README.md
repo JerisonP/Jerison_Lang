@@ -55,3 +55,24 @@ Features will be added gradually once the core stages are working.
 ## Getting started
 
 ## Progress log
+
+### Stage 1: Scanning ✅
+
+The scanner is complete. It reads a source file and turns it into a list of
+tokens, always taking the longest match it can, so `>=` becomes one token
+and `orchid` is a name rather than the keyword `or`.
+
+- Entry point that runs a `.jlang` file and exits with standard error codes
+  (64 for usage errors, 66 for missing files).
+- `TokenType` enum and `Token` class, with each token tracking its line number.
+- Recognizes operators, comments, whitespace, strings (including multi-line
+  ones), numbers, names, and keywords.
+- Reports unexpected characters and unterminated strings with the line
+  where they happened.
+- Tests grouped by token type, including checks on the error messages,
+  running in CI on every push.
+
+### Stage 2: Parsing 🚧
+
+Next up: defining the syntax tree classes the parser will build
+(Representing Code, chapter 5), then the parser itself (chapter 6).
